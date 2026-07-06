@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background rounded square -->
+  <rect width="512" height="512" rx="96" ry="96" fill="#2d6a4f"/>
+
+  <!-- Open book left page -->
+  <path d="M256 148
+    C256 148 180 140 124 158
+    C110 163 104 174 104 188
+    L104 352
+    C104 366 116 374 130 370
+    C182 354 256 362 256 362
+    Z"
+    fill="#d8f3dc" opacity="0.95"/>
+
+  <!-- Open book right page -->
+  <path d="M256 148
+    C256 148 332 140 388 158
+    C402 163 408 174 408 188
+    L408 352
+    C408 366 396 374 382 370
+    C330 354 256 362 256 362
+    Z"
+    fill="#ffffff" opacity="0.95"/>
+
+  <!-- Spine crease -->
+  <line x1="256" y1="148" x2="256" y2="362" stroke="#2d6a4f" stroke-width="6" opacity="0.4"/>
+
+  <!-- Lines on right page (text lines) -->
+  <line x1="278" y1="210" x2="378" y2="210" stroke="#b7e4c7" stroke-width="8" stroke-linecap="round"/>
+  <line x1="278" y1="238" x2="378" y2="238" stroke="#b7e4c7" stroke-width="8" stroke-linecap="round"/>
+  <line x1="278" y1="266" x2="350" y2="266" stroke="#b7e4c7" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Lines on left page -->
+  <line x1="134" y1="210" x2="234" y2="210" stroke="#95d5b2" stroke-width="8" stroke-linecap="round"/>
+  <line x1="134" y1="238" x2="234" y2="238" stroke="#95d5b2" stroke-width="8" stroke-linecap="round"/>
+  <line x1="134" y1="266" x2="210" y2="266" stroke="#95d5b2" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Checkmark badge (bottom right) -->
+  <circle cx="368" cy="368" r="68" fill="#52b788"/>
+  <circle cx="368" cy="368" r="58" fill="#40916c"/>
+  <polyline points="338,368 358,390 400,346"
+    fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
