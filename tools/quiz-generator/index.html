@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free practice quiz generator. Turn your own notes into a multiple-choice self-test in your browser - no account needed.">
+  <title>Practice Quiz Generator - StudyReady</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/tools.css">
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">StudyReady</a>
+  <nav>
+    <div class="nav-dropdown">
+      <a href="/tools" class="active">Tools</a>
+      <div class="dropdown-menu">
+        <a href="/tools/flashcards">Flashcard Builder</a>
+        <a href="/tools/quiz-generator" class="active">Practice Quiz Generator</a>
+        <a href="/tools/word-driller">Word List Driller</a>
+        <a href="/tools/cornell-notes">Cornell Notes Template</a>
+        <a href="/tools/study-planner">Study Planner</a>
+        <a href="/tools/concept-map">Concept Map Builder</a>
+        <a href="/tools/pomodoro">Pomodoro Timer</a>
+        <a href="/tools/essay-outline">Essay Outline Tool</a>
+        <a href="/tools/focus-checklist">Focus Checklist</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="/subjects">Subjects</a>
+      <div class="dropdown-menu">
+        <a href="/subjects/math">Mathematics</a>
+        <a href="/subjects/biology">Biology</a>
+        <a href="/subjects/chemistry">Chemistry</a>
+        <a href="/subjects/physics">Physics</a>
+        <a href="/subjects/world-history">World History</a>
+        <a href="/subjects/us-history">US History</a>
+        <a href="/subjects/literature">Literature</a>
+        <a href="/subjects/writing-grammar">Writing & Grammar</a>
+        <a href="/subjects/languages">Foreign Languages</a>
+        <a href="/subjects/computer-science">Computer Science</a>
+        <a href="/subjects/economics">Economics</a>
+      </div>
+    </div>
+    <a href="/tips">Tips</a>
+    <a href="/about">About</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <p class="section-label">Self-Testing</p>
+  <h1>Practice Quiz Generator</h1>
+  <p>Type in question-and-answer pairs from your notes, one per line in the format <code>Question | Answer</code>. The tool builds a multiple-choice quiz automatically, using your other answers as the wrong options, and scores you at the end.</p>
+</div>
+
+<div class="tool-shell">
+  <a class="tool-back" href="/tools">&larr; Back to Tools</a>
+
+  <div class="tool-panel" id="buildPanel">
+    <h2>1. Enter your questions</h2>
+    <label for="qaInput">One question per line, formatted as <code>Question | Answer</code></label>
+    <textarea id="qaInput" rows="8" placeholder="What is the powerhouse of the cell? | Mitochondria
+What year did WWII end? | 1945
+What is the capital of France? | Paris"></textarea>
+    <p class="helper-text">Need at least 4 questions so the tool has enough wrong-answer options to mix in.</p>
+    <div class="btn-row">
+      <button class="btn" id="buildQuiz">Generate quiz</button>
+      <button class="btn secondary" id="loadSample">Load a sample</button>
+    </div>
+  </div>
+
+  <div class="tool-panel" id="quizPanel" style="display:none;">
+    <h2>2. Take the quiz</h2>
+    <p class="helper-text" id="quizProgress"></p>
+    <div id="quizQuestion" style="margin:1rem 0 1.25rem; font-weight:600;"></div>
+    <div class="item-list" id="quizOptions"></div>
+    <div class="btn-row">
+      <button class="btn" id="nextQuestion" disabled>Next</button>
+      <button class="btn secondary" id="restartQuiz">Start over</button>
+    </div>
+  </div>
+
+  <div class="tool-panel" id="resultPanel" style="display:none;">
+    <h2>Results</h2>
+    <p id="scoreText" style="font-size:1.1rem; margin-bottom:1rem;"></p>
+    <div class="item-list" id="resultBreakdown"></div>
+    <div class="btn-row">
+      <button class="btn" id="retakeQuiz">Retake this quiz</button>
+      <button class="btn secondary" id="newQuiz">Build a new quiz</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  &copy; 2025 StudyReady &nbsp;&middot;&nbsp; Free for all students &nbsp;&middot;&nbsp; No account needed
+</footer>
+
+<script src="/tools.js"></script>
+<script>
+  let questions = [];
+  let quiz = [];
+  let qIndex = 0;
+  let answers = [];
+  let locked = false;
+
+  const sample = `What is the powerhouse of the cell? | Mitochondria
+What year did World War II end? | 1945
+What is the chemical symbol for gold? | Au
+Who wrote "Romeo and Juliet"? | Shakespeare
+What is the capital of Japan? | Tokyo
+What is the boiling point of water in Celsius? | 100`;
+
+  document.getElementById('loadSample').addEventListener('click', () => {
+    document.getElementById('qaInput').value = sample;
+  });
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  document.getElementById('buildQuiz').addEventListener('click', () => {
+    const lines = document.getElementById('qaInput').value.split('\n').map(l => l.trim()).filter(Boolean);
+    questions = lines.map(line => {
+      const [q, a] = line.split('|').map(s => s && s.trim());
+      return q && a ? { question: q, answer: a } : null;
+    }).filter(Boolean);
+
+    if (questions.length < 4) {
+      alert('Please enter at least 4 valid "Question | Answer" lines.');
+      return;
+    }
+
+    quiz = shuffle(questions).map(item => {
+      const wrongPool = shuffle(questions.filter(o => o.answer !== item.answer).map(o => o.answer));
+      const wrong = wrongPool.slice(0, Math.min(3, wrongPool.length));
+      const options = shuffle([item.answer, ...wrong]);
+      return { question: item.question, answer: item.answer, options };
+    });
+
+    qIndex = 0;
+    answers = [];
+    document.getElementById('buildPanel').style.display = 'none';
+    document.getElementById('resultPanel').style.display = 'none';
+    document.getElementById('quizPanel').style.display = 'block';
+    showQuestion();
+  });
+
+  function showQuestion() {
+    locked = false;
+    const item = quiz[qIndex];
+    document.getElementById('quizProgress').textContent = `Question ${qIndex + 1} of ${quiz.length}`;
+    document.getElementById('quizQuestion').textContent = item.question;
+    const opts = document.getElementById('quizOptions');
+    opts.innerHTML = '';
+    item.options.forEach(opt => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.style.cursor = 'pointer';
+      row.textContent = opt;
+      row.addEventListener('click', () => selectAnswer(opt, row));
+      opts.appendChild(row);
+    });
+    document.getElementById('nextQuestion').disabled = true;
+  }
+
+  function selectAnswer(opt, row) {
+    if (locked) return;
+    locked = true;
+    const item = quiz[qIndex];
+    const correct = opt === item.answer;
+    answers.push({ question: item.question, given: opt, answer: item.answer, correct });
+    [...document.getElementById('quizOptions').children].forEach(r => {
+      if (r.textContent === item.answer) r.style.borderColor = 'var(--accent)';
+      if (r === row && !correct) r.style.borderColor = '#b3261e';
+    });
+    document.getElementById('nextQuestion').disabled = false;
+  }
+
+  document.getElementById('nextQuestion').addEventListener('click', () => {
+    qIndex++;
+    if (qIndex >= quiz.length) {
+      showResults();
+    } else {
+      showQuestion();
+    }
+  });
+
+  function showResults() {
+    document.getElementById('quizPanel').style.display = 'none';
+    document.getElementById('resultPanel').style.display = 'block';
+    const correctCount = answers.filter(a => a.correct).length;
+    document.getElementById('scoreText').textContent = `You scored ${correctCount} / ${answers.length} (${Math.round(correctCount / answers.length * 100)}%)`;
+    const breakdown = document.getElementById('resultBreakdown');
+    breakdown.innerHTML = '';
+    answers.forEach(a => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <div class="grow">
+          <strong>${a.question}</strong>
+          <div class="meta">Your answer: ${a.given}${a.correct ? '' : ' &middot; Correct answer: ' + a.answer}</div>
+        </div>
+        <span class="pill ${a.correct ? 'mastered' : 'overdue'}">${a.correct ? 'Correct' : 'Wrong'}</span>
+      `;
+      breakdown.appendChild(row);
+    });
+  }
+
+  document.getElementById('restartQuiz').addEventListener('click', () => {
+    qIndex = 0;
+    answers = [];
+    quiz = shuffle(quiz);
+    showQuestion();
+  });
+
+  document.getElementById('retakeQuiz').addEventListener('click', () => {
+    qIndex = 0;
+    answers = [];
+    quiz = shuffle(quiz).map(q => ({ ...q, options: shuffle(q.options) }));
+    document.getElementById('resultPanel').style.display = 'none';
+    document.getElementById('quizPanel').style.display = 'block';
+    showQuestion();
+  });
+
+  document.getElementById('newQuiz').addEventListener('click', () => {
+    document.getElementById('resultPanel').style.display = 'none';
+    document.getElementById('buildPanel').style.display = 'block';
+  });
+</script>
+
+</body>
+</html>

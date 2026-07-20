@@ -7,14 +7,43 @@
   <title>Subjects - StudyReady</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/tools.css">
 </head>
 <body>
 
 <header>
   <a class="logo" href="/">StudyReady</a>
   <nav>
-    <a href="/tools">Tools</a>
-    <a href="/subjects" class="active">Subjects</a>
+    <div class="nav-dropdown">
+      <a href="/tools">Tools</a>
+      <div class="dropdown-menu">
+        <a href="/tools/flashcards">Flashcard Builder</a>
+        <a href="/tools/quiz-generator">Practice Quiz Generator</a>
+        <a href="/tools/word-driller">Word List Driller</a>
+        <a href="/tools/cornell-notes">Cornell Notes Template</a>
+        <a href="/tools/study-planner">Study Planner</a>
+        <a href="/tools/concept-map">Concept Map Builder</a>
+        <a href="/tools/pomodoro">Pomodoro Timer</a>
+        <a href="/tools/essay-outline">Essay Outline Tool</a>
+        <a href="/tools/focus-checklist">Focus Checklist</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="/subjects" class="active">Subjects</a>
+      <div class="dropdown-menu">
+        <a href="/subjects/math">Mathematics</a>
+        <a href="/subjects/biology">Biology</a>
+        <a href="/subjects/chemistry">Chemistry</a>
+        <a href="/subjects/physics">Physics</a>
+        <a href="/subjects/world-history">World History</a>
+        <a href="/subjects/us-history">US History</a>
+        <a href="/subjects/literature">Literature</a>
+        <a href="/subjects/writing-grammar">Writing & Grammar</a>
+        <a href="/subjects/languages">Foreign Languages</a>
+        <a href="/subjects/computer-science">Computer Science</a>
+        <a href="/subjects/economics">Economics</a>
+      </div>
+    </div>
     <a href="/tips">Tips</a>
     <a href="/about">About</a>
   </nav>
@@ -30,26 +59,26 @@
   <p class="section-label">STEM</p>
   <h2>Math & Science</h2>
   <div class="grid">
-    <div class="card">
+    <a class="card" href="/subjects/math">
       <span class="tag">Math</span>
       <h3>Mathematics</h3>
-      <p>Practice problem sets, formula sheets for algebra through calculus, and step-by-step worked examples for common exam questions.</p>
-    </div>
-    <div class="card">
+      <p>Formula sheets for algebra through calculus, worked examples, and strategy for common exam questions.</p>
+    </a>
+    <a class="card" href="/subjects/biology">
       <span class="tag">Science</span>
       <h3>Biology</h3>
-      <p>Cell diagrams, vocabulary lists, and process summaries covering cell biology, genetics, evolution, and ecology.</p>
-    </div>
-    <div class="card">
+      <p>Key vocabulary and process summaries covering cell biology, genetics, evolution, and ecology.</p>
+    </a>
+    <a class="card" href="/subjects/chemistry">
       <span class="tag">Science</span>
       <h3>Chemistry</h3>
-      <p>Periodic table reference, equation balancing guides, and flashcard sets for element properties and reaction types.</p>
-    </div>
-    <div class="card">
+      <p>Periodic table reference, equation balancing guides, and reaction types with worked examples.</p>
+    </a>
+    <a class="card" href="/subjects/physics">
       <span class="tag">Science</span>
       <h3>Physics</h3>
       <p>Formula reference sheets, unit conversion guides, and concept summaries for mechanics, waves, and electricity.</p>
-    </div>
+    </a>
   </div>
 </div>
 
@@ -57,26 +86,26 @@
   <p class="section-label">Humanities</p>
   <h2>History & English</h2>
   <div class="grid">
-    <div class="card">
+    <a class="card" href="/subjects/world-history">
       <span class="tag">History</span>
       <h3>World History</h3>
       <p>Timelines, cause-and-effect summaries, and key term lists organized by era - ancient civilizations through the modern period.</p>
-    </div>
-    <div class="card">
+    </a>
+    <a class="card" href="/subjects/us-history">
       <span class="tag">History</span>
       <h3>US History</h3>
-      <p>Event summaries, document analysis guides, and flashcard sets covering major periods from colonization to present day.</p>
-    </div>
-    <div class="card">
+      <p>Event summaries and key documents covering major periods from colonization to present day.</p>
+    </a>
+    <a class="card" href="/subjects/literature">
       <span class="tag">English</span>
       <h3>Literature</h3>
-      <p>Character maps, theme trackers, and essay structures for analyzing novels, short stories, and poetry.</p>
-    </div>
-    <div class="card">
+      <p>Literary devices, theme analysis strategies, and essay structures for analyzing novels, short stories, and poetry.</p>
+    </a>
+    <a class="card" href="/subjects/writing-grammar">
       <span class="tag">English</span>
       <h3>Writing & Grammar</h3>
-      <p>Essay outline templates, grammar reference sheets, and revision checklists for persuasive, analytical, and narrative writing.</p>
-    </div>
+      <p>Essay structure templates, grammar reference sheets, and a revision checklist for persuasive, analytical, and narrative writing.</p>
+    </a>
   </div>
 </div>
 
@@ -84,21 +113,21 @@
   <p class="section-label">Languages & More</p>
   <h2>Other subjects</h2>
   <div class="grid">
-    <div class="card">
+    <a class="card" href="/subjects/languages">
       <span class="tag">Languages</span>
       <h3>Foreign Languages</h3>
-      <p>Vocabulary drilling tools, conjugation tables, and spaced repetition flashcard sets for Spanish, French, German, and more.</p>
-    </div>
-    <div class="card">
+      <p>Vocabulary-building strategy, conjugation basics, and spaced repetition tips for Spanish, French, German, and more.</p>
+    </a>
+    <a class="card" href="/subjects/computer-science">
       <span class="tag">Computing</span>
       <h3>Computer Science</h3>
-      <p>Concept maps for data structures and algorithms, pseudocode examples, and vocabulary lists for introductory CS courses.</p>
-    </div>
-    <div class="card">
+      <p>Data structures, common algorithms, and a Big O notation cheat sheet for introductory CS courses.</p>
+    </a>
+    <a class="card" href="/subjects/economics">
       <span class="tag">Economics</span>
       <h3>Economics</h3>
-      <p>Key term flashcards, supply and demand diagram guides, and summary sheets for micro and macroeconomics topics.</p>
-    </div>
+      <p>Key term glossaries, supply and demand fundamentals, and summary sheets for micro and macroeconomics topics.</p>
+    </a>
   </div>
 </div>
 

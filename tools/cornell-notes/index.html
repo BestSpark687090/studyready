@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free Cornell Notes template. Take structured notes with cues, main content, and a summary - saved in your browser, printable, no account needed.">
+  <title>Cornell Notes Template - StudyReady</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/tools.css">
+  <style>
+    .cornell-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .cornell-cue, .cornell-notes {
+      padding: 1rem;
+      min-height: 360px;
+    }
+    .cornell-cue {
+      background: var(--accent-light);
+      border-right: 1px solid var(--border);
+    }
+    .cornell-notes { background: var(--surface); }
+    .cornell-summary {
+      grid-column: 1 / -1;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 1rem;
+    }
+    .cornell-grid textarea {
+      border: none;
+      background: transparent;
+      width: 100%;
+      height: 100%;
+      min-height: 320px;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+    .cornell-summary textarea { min-height: 90px; }
+    .cornell-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">StudyReady</a>
+  <nav>
+    <div class="nav-dropdown">
+      <a href="/tools" class="active">Tools</a>
+      <div class="dropdown-menu">
+        <a href="/tools/flashcards">Flashcard Builder</a>
+        <a href="/tools/quiz-generator">Practice Quiz Generator</a>
+        <a href="/tools/word-driller">Word List Driller</a>
+        <a href="/tools/cornell-notes" class="active">Cornell Notes Template</a>
+        <a href="/tools/study-planner">Study Planner</a>
+        <a href="/tools/concept-map">Concept Map Builder</a>
+        <a href="/tools/pomodoro">Pomodoro Timer</a>
+        <a href="/tools/essay-outline">Essay Outline Tool</a>
+        <a href="/tools/focus-checklist">Focus Checklist</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="/subjects">Subjects</a>
+      <div class="dropdown-menu">
+        <a href="/subjects/math">Mathematics</a>
+        <a href="/subjects/biology">Biology</a>
+        <a href="/subjects/chemistry">Chemistry</a>
+        <a href="/subjects/physics">Physics</a>
+        <a href="/subjects/world-history">World History</a>
+        <a href="/subjects/us-history">US History</a>
+        <a href="/subjects/literature">Literature</a>
+        <a href="/subjects/writing-grammar">Writing & Grammar</a>
+        <a href="/subjects/languages">Foreign Languages</a>
+        <a href="/subjects/computer-science">Computer Science</a>
+        <a href="/subjects/economics">Economics</a>
+      </div>
+    </div>
+    <a href="/tips">Tips</a>
+    <a href="/about">About</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <p class="section-label">Note-Taking</p>
+  <h1>Cornell Notes Template</h1>
+  <p>The Cornell method splits a page into three zones: cues on the left for keywords and questions, notes on the right for the main content, and a summary at the bottom written in your own words. Your notes save automatically in this browser.</p>
+</div>
+
+<div class="tool-shell">
+  <a class="tool-back" href="/tools">&larr; Back to Tools</a>
+
+  <div class="tool-panel">
+    <div class="field-row">
+      <div>
+        <label for="noteTitle">Note title / topic</label>
+        <input type="text" id="noteTitle" placeholder="e.g. Chapter 7 - Cell Division">
+      </div>
+      <div>
+        <label for="noteDate">Date</label>
+        <input type="date" id="noteDate">
+      </div>
+    </div>
+  </div>
+
+  <div class="cornell-grid">
+    <div class="cornell-cue">
+      <span class="cornell-label">Cues &amp; Questions</span>
+      <textarea id="cueField" placeholder="Keywords, questions to test yourself, prompts..."></textarea>
+    </div>
+    <div class="cornell-notes">
+      <span class="cornell-label">Notes</span>
+      <textarea id="notesField" placeholder="Main lecture or reading notes go here..."></textarea>
+    </div>
+    <div class="cornell-summary">
+      <span class="cornell-label">Summary</span>
+      <textarea id="summaryField" placeholder="In a few sentences, summarize this page in your own words..."></textarea>
+    </div>
+  </div>
+
+  <div class="btn-row no-print" style="margin-top:1.25rem;">
+    <button class="btn" id="saveNote">Save note</button>
+    <button class="btn secondary" id="printNote">Print / export as PDF</button>
+    <button class="btn danger" id="newNote">New blank note</button>
+  </div>
+  <p class="helper-text" id="saveStatus"></p>
+
+  <div class="tool-panel no-print" style="margin-top:2rem;">
+    <h2>Saved notes</h2>
+    <div class="item-list" id="savedList"></div>
+    <p class="empty-state" id="noSaved">No saved notes yet.</p>
+  </div>
+</div>
+
+<footer>
+  &copy; 2025 StudyReady &nbsp;&middot;&nbsp; Free for all students &nbsp;&middot;&nbsp; No account needed
+</footer>
+
+<script src="/tools.js"></script>
+<script>
+  const STORE_KEY = 'studyready_cornellnotes';
+  let notes = StudyStore.get(STORE_KEY, []);
+  let activeId = null;
+
+  function save() { StudyStore.set(STORE_KEY, notes); }
+  function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function renderSaved() {
+    const list = document.getElementById('savedList');
+    const empty = document.getElementById('noSaved');
+    list.innerHTML = '';
+    if (!notes.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    notes.slice().reverse().forEach(n => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <div class="grow">
+          <strong>${escapeHtml(n.title || 'Untitled')}</strong>
+          <div class="meta">${n.date || ''}</div>
+        </div>
+        <button class="btn secondary" data-open="${n.id}">Open</button>
+        <button class="icon-btn" data-del="${n.id}" title="Delete">&times;</button>
+      `;
+      list.appendChild(row);
+    });
+    list.querySelectorAll('[data-open]').forEach(btn => {
+      btn.addEventListener('click', () => loadNote(btn.getAttribute('data-open')));
+    });
+    list.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        notes = notes.filter(n => n.id !== btn.getAttribute('data-del'));
+        save();
+        renderSaved();
+      });
+    });
+  }
+
+  function loadNote(id) {
+    const n = notes.find(x => x.id === id);
+    if (!n) return;
+    activeId = id;
+    document.getElementById('noteTitle').value = n.title || '';
+    document.getElementById('noteDate').value = n.date || '';
+    document.getElementById('cueField').value = n.cue || '';
+    document.getElementById('notesField').value = n.notes || '';
+    document.getElementById('summaryField').value = n.summary || '';
+    document.getElementById('saveStatus').textContent = 'Loaded "' + (n.title || 'Untitled') + '"';
+  }
+
+  document.getElementById('saveNote').addEventListener('click', () => {
+    const data = {
+      title: document.getElementById('noteTitle').value.trim(),
+      date: document.getElementById('noteDate').value,
+      cue: document.getElementById('cueField').value,
+      notes: document.getElementById('notesField').value,
+      summary: document.getElementById('summaryField').value
+    };
+    if (activeId) {
+      const n = notes.find(x => x.id === activeId);
+      Object.assign(n, data);
+    } else {
+      activeId = StudyStore.uid();
+      notes.push({ id: activeId, ...data });
+    }
+    save();
+    renderSaved();
+    document.getElementById('saveStatus').textContent = 'Saved.';
+  });
+
+  document.getElementById('newNote').addEventListener('click', () => {
+    activeId = null;
+    document.getElementById('noteTitle').value = '';
+    document.getElementById('noteDate').value = '';
+    document.getElementById('cueField').value = '';
+    document.getElementById('notesField').value = '';
+    document.getElementById('summaryField').value = '';
+    document.getElementById('saveStatus').textContent = '';
+  });
+
+  document.getElementById('printNote').addEventListener('click', () => window.print());
+
+  renderSaved();
+</script>
+
+</body>
+</html>

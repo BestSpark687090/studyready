@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free flashcard builder with spaced repetition. Create digital flashcard decks for any subject and review them in your browser - no account needed.">
+  <title>Flashcard Builder - StudyReady</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/tools.css">
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">StudyReady</a>
+  <nav>
+    <div class="nav-dropdown">
+      <a href="/tools" class="active">Tools</a>
+      <div class="dropdown-menu">
+        <a href="/tools/flashcards" class="active">Flashcard Builder</a>
+        <a href="/tools/quiz-generator">Practice Quiz Generator</a>
+        <a href="/tools/word-driller">Word List Driller</a>
+        <a href="/tools/cornell-notes">Cornell Notes Template</a>
+        <a href="/tools/study-planner">Study Planner</a>
+        <a href="/tools/concept-map">Concept Map Builder</a>
+        <a href="/tools/pomodoro">Pomodoro Timer</a>
+        <a href="/tools/essay-outline">Essay Outline Tool</a>
+        <a href="/tools/focus-checklist">Focus Checklist</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="/subjects">Subjects</a>
+      <div class="dropdown-menu">
+        <a href="/subjects/math">Mathematics</a>
+        <a href="/subjects/biology">Biology</a>
+        <a href="/subjects/chemistry">Chemistry</a>
+        <a href="/subjects/physics">Physics</a>
+        <a href="/subjects/world-history">World History</a>
+        <a href="/subjects/us-history">US History</a>
+        <a href="/subjects/literature">Literature</a>
+        <a href="/subjects/writing-grammar">Writing & Grammar</a>
+        <a href="/subjects/languages">Foreign Languages</a>
+        <a href="/subjects/computer-science">Computer Science</a>
+        <a href="/subjects/economics">Economics</a>
+      </div>
+    </div>
+    <a href="/tips">Tips</a>
+    <a href="/about">About</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <p class="section-label">Memorization</p>
+  <h1>Flashcard Builder</h1>
+  <p>Create a deck, add cards, and review them with a simple spaced-repetition loop. Cards you mark "hard" come back sooner; cards you mark "easy" get pushed further out. Everything is saved in your browser - nothing is uploaded anywhere.</p>
+</div>
+
+<div class="tool-shell">
+  <a class="tool-back" href="/tools">&larr; Back to Tools</a>
+
+  <div class="tool-panel">
+    <h2>Your decks</h2>
+    <div class="field-row">
+      <div>
+        <label for="deckName">New deck name</label>
+        <input type="text" id="deckName" placeholder="e.g. Spanish Verbs, Cell Biology">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="createDeck">Create deck</button>
+    </div>
+    <div class="item-list" id="deckList" style="margin-top:1.25rem;"></div>
+  </div>
+
+  <div class="tool-panel" id="deckDetail" style="display:none;">
+    <h2 id="deckTitle">Deck</h2>
+
+    <div style="margin-bottom:1.5rem;">
+      <div class="field-row">
+        <div>
+          <label for="cardFront">Front (question / term)</label>
+          <textarea id="cardFront" rows="2"></textarea>
+        </div>
+        <div>
+          <label for="cardBack">Back (answer / definition)</label>
+          <textarea id="cardBack" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="addCard">Add card</button>
+        <button class="btn secondary" id="startReview">Review this deck</button>
+        <button class="btn danger" id="deleteDeck">Delete deck</button>
+      </div>
+    </div>
+
+    <div class="item-list" id="cardList"></div>
+    <p class="empty-state" id="noCards" style="display:none;">No cards yet. Add your first card above.</p>
+  </div>
+
+  <div class="tool-panel" id="reviewPanel" style="display:none;">
+    <h2>Review: <span id="reviewDeckName"></span></h2>
+    <p class="helper-text" id="reviewProgress"></p>
+    <div class="flip-card" id="flipCard" style="margin:1.5rem 0;">
+      <div class="flip-card-inner">
+        <div class="flip-card-face front" id="faceFront"></div>
+        <div class="flip-card-face back" id="faceBack"></div>
+      </div>
+    </div>
+    <p class="helper-text no-print">Click the card to flip it, then rate how well you knew it.</p>
+    <div class="btn-row">
+      <button class="btn secondary" id="markHard">Hard - show again soon</button>
+      <button class="btn" id="markEasy">Easy - show later</button>
+      <button class="btn secondary" id="endReview">End review</button>
+    </div>
+    <p class="empty-state" id="reviewDone" style="display:none;">Deck complete! Every card has been reviewed this session.</p>
+  </div>
+</div>
+
+<footer>
+  &copy; 2025 StudyReady &nbsp;&middot;&nbsp; Free for all students &nbsp;&middot;&nbsp; No account needed
+</footer>
+
+<script src="/tools.js"></script>
+<script>
+  const STORE_KEY = 'studyready_flashcards';
+  let decks = StudyStore.get(STORE_KEY, []);
+  let activeDeckId = null;
+  let reviewQueue = [];
+  let reviewIndex = 0;
+  let currentCard = null;
+
+  function save() { StudyStore.set(STORE_KEY, decks); }
+
+  function renderDecks() {
+    const list = document.getElementById('deckList');
+    list.innerHTML = '';
+    if (decks.length === 0) {
+      list.innerHTML = '<p class="empty-state">No decks yet. Create one to get started.</p>';
+      return;
+    }
+    decks.forEach(deck => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <div class="grow">
+          <strong>${escapeHtml(deck.name)}</strong>
+          <div class="meta">${deck.cards.length} card${deck.cards.length === 1 ? '' : 's'}</div>
+        </div>
+        <button class="btn secondary" data-open="${deck.id}">Open</button>
+      `;
+      list.appendChild(row);
+    });
+    list.querySelectorAll('[data-open]').forEach(btn => {
+      btn.addEventListener('click', () => openDeck(btn.getAttribute('data-open')));
+    });
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function openDeck(id) {
+    activeDeckId = id;
+    document.getElementById('deckDetail').style.display = 'block';
+    document.getElementById('reviewPanel').style.display = 'none';
+    const deck = decks.find(d => d.id === id);
+    document.getElementById('deckTitle').textContent = deck.name;
+    renderCards();
+    document.getElementById('deckDetail').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function renderCards() {
+    const deck = decks.find(d => d.id === activeDeckId);
+    const list = document.getElementById('cardList');
+    const noCards = document.getElementById('noCards');
+    list.innerHTML = '';
+    if (!deck.cards.length) {
+      noCards.style.display = 'block';
+      return;
+    }
+    noCards.style.display = 'none';
+    deck.cards.forEach((card, i) => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <div class="grow">
+          <strong>${escapeHtml(card.front)}</strong>
+          <div class="meta">${escapeHtml(card.back)}</div>
+        </div>
+        <span class="pill ${card.box > 1 ? 'mastered' : ''}">${card.box > 1 ? 'Learning well' : 'New'}</span>
+        <button class="icon-btn" data-del="${i}" title="Delete card">&times;</button>
+      `;
+      list.appendChild(row);
+    });
+    list.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        deck.cards.splice(Number(btn.getAttribute('data-del')), 1);
+        save();
+        renderCards();
+        renderDecks();
+      });
+    });
+  }
+
+  document.getElementById('createDeck').addEventListener('click', () => {
+    const name = document.getElementById('deckName').value.trim();
+    if (!name) return;
+    decks.push({ id: StudyStore.uid(), name, cards: [] });
+    document.getElementById('deckName').value = '';
+    save();
+    renderDecks();
+  });
+
+  document.getElementById('addCard').addEventListener('click', () => {
+    const front = document.getElementById('cardFront').value.trim();
+    const back = document.getElementById('cardBack').value.trim();
+    if (!front || !back) return;
+    const deck = decks.find(d => d.id === activeDeckId);
+    deck.cards.push({ front, back, box: 1 });
+    document.getElementById('cardFront').value = '';
+    document.getElementById('cardBack').value = '';
+    save();
+    renderCards();
+    renderDecks();
+  });
+
+  document.getElementById('deleteDeck').addEventListener('click', () => {
+    if (!confirm('Delete this deck and all its cards?')) return;
+    decks = decks.filter(d => d.id !== activeDeckId);
+    save();
+    document.getElementById('deckDetail').style.display = 'none';
+    renderDecks();
+  });
+
+  document.getElementById('startReview').addEventListener('click', () => {
+    const deck = decks.find(d => d.id === activeDeckId);
+    if (!deck.cards.length) return;
+    reviewQueue = deck.cards.map((c, i) => i);
+    reviewIndex = 0;
+    document.getElementById('reviewDeckName').textContent = deck.name;
+    document.getElementById('reviewPanel').style.display = 'block';
+    document.getElementById('reviewDone').style.display = 'none';
+    showReviewCard();
+    document.getElementById('reviewPanel').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  function showReviewCard() {
+    const deck = decks.find(d => d.id === activeDeckId);
+    const flip = document.getElementById('flipCard');
+    flip.classList.remove('flipped');
+    if (reviewIndex >= reviewQueue.length) {
+      document.getElementById('reviewDone').style.display = 'block';
+      document.getElementById('reviewProgress').textContent = '';
+      document.getElementById('faceFront').textContent = '';
+      document.getElementById('faceBack').textContent = '';
+      return;
+    }
+    document.getElementById('reviewDone').style.display = 'none';
+    currentCard = deck.cards[reviewQueue[reviewIndex]];
+    document.getElementById('faceFront').textContent = currentCard.front;
+    document.getElementById('faceBack').textContent = currentCard.back;
+    document.getElementById('reviewProgress').textContent = `Card ${reviewIndex + 1} of ${reviewQueue.length}`;
+  }
+
+  document.getElementById('flipCard').addEventListener('click', function () {
+    this.classList.toggle('flipped');
+  });
+
+  function rate(easy) {
+    if (!currentCard) return;
+    currentCard.box = easy ? Math.min(currentCard.box + 1, 5) : 1;
+    save();
+    reviewIndex++;
+    showReviewCard();
+  }
+
+  document.getElementById('markEasy').addEventListener('click', () => rate(true));
+  document.getElementById('markHard').addEventListener('click', () => rate(false));
+  document.getElementById('endReview').addEventListener('click', () => {
+    document.getElementById('reviewPanel').style.display = 'none';
+    renderCards();
+    renderDecks();
+  });
+
+  renderDecks();
+</script>
+
+</body>
+</html>

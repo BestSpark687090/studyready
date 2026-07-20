@@ -10,6 +10,7 @@
      crossorigin="anonymous"></script>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/tools.css">
   <style>
     .hero {
       max-width: 720px;
@@ -82,8 +83,36 @@
 <header>
   <a class="logo" href="/">StudyReady</a>
   <nav>
-    <a href="/tools">Tools</a>
-    <a href="/subjects">Subjects</a>
+    <div class="nav-dropdown">
+      <a href="/tools">Tools</a>
+      <div class="dropdown-menu">
+        <a href="/tools/flashcards">Flashcard Builder</a>
+        <a href="/tools/quiz-generator">Practice Quiz Generator</a>
+        <a href="/tools/word-driller">Word List Driller</a>
+        <a href="/tools/cornell-notes">Cornell Notes Template</a>
+        <a href="/tools/study-planner">Study Planner</a>
+        <a href="/tools/concept-map">Concept Map Builder</a>
+        <a href="/tools/pomodoro">Pomodoro Timer</a>
+        <a href="/tools/essay-outline">Essay Outline Tool</a>
+        <a href="/tools/focus-checklist">Focus Checklist</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="/subjects">Subjects</a>
+      <div class="dropdown-menu">
+        <a href="/subjects/math">Mathematics</a>
+        <a href="/subjects/biology">Biology</a>
+        <a href="/subjects/chemistry">Chemistry</a>
+        <a href="/subjects/physics">Physics</a>
+        <a href="/subjects/world-history">World History</a>
+        <a href="/subjects/us-history">US History</a>
+        <a href="/subjects/literature">Literature</a>
+        <a href="/subjects/writing-grammar">Writing & Grammar</a>
+        <a href="/subjects/languages">Foreign Languages</a>
+        <a href="/subjects/computer-science">Computer Science</a>
+        <a href="/subjects/economics">Economics</a>
+      </div>
+    </div>
     <a href="/tips">Tips</a>
     <a href="/about">About</a>
   </nav>
@@ -99,36 +128,36 @@
   <p class="section-label">Study Tools</p>
   <h2>Everything you need in one place</h2>
   <div class="grid">
-    <div class="card">
+    <a class="card" href="/tools/flashcards">
       <span class="tag">Memorization</span>
       <h3>Flashcard Builder</h3>
       <p>Create digital flashcards for any subject. Review with spaced repetition to lock in long-term memory.</p>
-    </div>
-    <div class="card">
+    </a>
+    <a class="card" href="/tools/cornell-notes">
       <span class="tag">Organization</span>
       <h3>Note Templates</h3>
       <p>Structured templates for Cornell notes, mind maps, and outline-style note-taking across all subjects.</p>
-    </div>
-    <div class="card">
+    </a>
+    <a class="card" href="/tools/study-planner">
       <span class="tag">Planning</span>
       <h3>Study Planner</h3>
       <p>Break assignments into sessions. Set goals, track progress, and avoid last-minute cramming.</p>
-    </div>
-    <div class="card">
+    </a>
+    <a class="card" href="/tools/pomodoro">
       <span class="tag">Focus</span>
       <h3>Pomodoro Timer</h3>
       <p>Work in focused 25-minute intervals with short breaks. A proven method for sustained concentration.</p>
-    </div>
-    <div class="card">
+    </a>
+    <a class="card" href="/tools/quiz-generator">
       <span class="tag">Review</span>
       <h3>Practice Quiz Generator</h3>
-      <p>Turn your notes into multiple choice and short answer questions to test yourself before exams.</p>
-    </div>
-    <div class="card">
+      <p>Turn your notes into a multiple choice quiz to test yourself before exams.</p>
+    </a>
+    <a class="card" href="/tools/essay-outline">
       <span class="tag">Writing</span>
       <h3>Essay Outline Tool</h3>
       <p>Structure your argument before you write. Build a clear thesis, supporting points, and conclusion.</p>
-    </div>
+    </a>
   </div>
 </div>
 

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free essay outline tool. Structure your thesis, supporting points, and conclusion before you write - no account needed.">
+  <title>Essay Outline Tool - StudyReady</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/tools.css">
+  <style>
+    .point-block {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: var(--bg);
+    }
+    .sub-point-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .sub-point-row input { flex: 1; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">StudyReady</a>
+  <nav>
+    <div class="nav-dropdown">
+      <a href="/tools" class="active">Tools</a>
+      <div class="dropdown-menu">
+        <a href="/tools/flashcards">Flashcard Builder</a>
+        <a href="/tools/quiz-generator">Practice Quiz Generator</a>
+        <a href="/tools/word-driller">Word List Driller</a>
+        <a href="/tools/cornell-notes">Cornell Notes Template</a>
+        <a href="/tools/study-planner">Study Planner</a>
+        <a href="/tools/concept-map">Concept Map Builder</a>
+        <a href="/tools/pomodoro">Pomodoro Timer</a>
+        <a href="/tools/essay-outline" class="active">Essay Outline Tool</a>
+        <a href="/tools/focus-checklist">Focus Checklist</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="/subjects">Subjects</a>
+      <div class="dropdown-menu">
+        <a href="/subjects/math">Mathematics</a>
+        <a href="/subjects/biology">Biology</a>
+        <a href="/subjects/chemistry">Chemistry</a>
+        <a href="/subjects/physics">Physics</a>
+        <a href="/subjects/world-history">World History</a>
+        <a href="/subjects/us-history">US History</a>
+        <a href="/subjects/literature">Literature</a>
+        <a href="/subjects/writing-grammar">Writing & Grammar</a>
+        <a href="/subjects/languages">Foreign Languages</a>
+        <a href="/subjects/computer-science">Computer Science</a>
+        <a href="/subjects/economics">Economics</a>
+      </div>
+    </div>
+    <a href="/tips">Tips</a>
+    <a href="/about">About</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <p class="section-label">Writing</p>
+  <h1>Essay Outline Tool</h1>
+  <p>Structure your argument before you write a single paragraph. Build a clear thesis, add supporting points with evidence, and wrap it up with a conclusion - then export the whole outline as plain text to work from.</p>
+</div>
+
+<div class="tool-shell">
+  <a class="tool-back" href="/tools">&larr; Back to Tools</a>
+
+  <div class="tool-panel">
+    <label for="thesis">Thesis statement</label>
+    <textarea id="thesis" rows="2" placeholder="The one-sentence argument your whole essay will support..."></textarea>
+  </div>
+
+  <div class="tool-panel">
+    <h2>Supporting points</h2>
+    <div id="pointsContainer"></div>
+    <div class="btn-row">
+      <button class="btn secondary" id="addPoint">+ Add supporting point</button>
+    </div>
+  </div>
+
+  <div class="tool-panel">
+    <label for="conclusion">Conclusion</label>
+    <textarea id="conclusion" rows="2" placeholder="Restate the thesis and summarize why it matters..."></textarea>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" id="saveOutline">Save outline</button>
+    <button class="btn secondary" id="exportOutline">Export as text</button>
+    <button class="btn danger" id="clearOutline">Clear</button>
+  </div>
+  <p class="helper-text" id="saveStatus"></p>
+</div>
+
+<footer>
+  &copy; 2025 StudyReady &nbsp;&middot;&nbsp; Free for all students &nbsp;&middot;&nbsp; No account needed
+</footer>
+
+<script src="/tools.js"></script>
+<script>
+  const STORE_KEY = 'studyready_essayoutline';
+  let outline = StudyStore.get(STORE_KEY, {
+    thesis: '', conclusion: '',
+    points: [{ text: '', subs: [''] }, { text: '', subs: [''] }]
+  });
+
+  function save() { StudyStore.set(STORE_KEY, outline); }
+
+  function renderPoints() {
+    const container = document.getElementById('pointsContainer');
+    container.innerHTML = '';
+    outline.points.forEach((point, pi) => {
+      const block = document.createElement('div');
+      block.className = 'point-block';
+      block.innerHTML = `
+        <div class="field-row">
+          <div style="flex:1;">
+            <label>Point ${pi + 1}</label>
+            <input type="text" data-point="${pi}" value="${escapeAttr(point.text)}" placeholder="e.g. Renewable energy reduces long-term costs">
+          </div>
+          <button class="icon-btn" data-delpoint="${pi}" title="Remove point">&times;</button>
+        </div>
+        <div class="sub-points" data-subs="${pi}"></div>
+        <button class="btn secondary" style="font-size:0.78rem; padding:0.4rem 0.8rem;" data-addsub="${pi}">+ Add evidence</button>
+      `;
+      container.appendChild(block);
+      const subsEl = block.querySelector(`[data-subs="${pi}"]`);
+      point.subs.forEach((sub, si) => {
+        const row = document.createElement('div');
+        row.className = 'sub-point-row';
+        row.innerHTML = `
+          <input type="text" data-sub="${pi}:${si}" value="${escapeAttr(sub)}" placeholder="Supporting evidence or example">
+          <button class="icon-btn" data-delsub="${pi}:${si}" title="Remove">&times;</button>
+        `;
+        subsEl.appendChild(row);
+      });
+    });
+
+    container.querySelectorAll('[data-point]').forEach(inp => {
+      inp.addEventListener('input', () => {
+        outline.points[Number(inp.getAttribute('data-point'))].text = inp.value;
+        save();
+      });
+    });
+    container.querySelectorAll('[data-sub]').forEach(inp => {
+      inp.addEventListener('input', () => {
+        const [pi, si] = inp.getAttribute('data-sub').split(':').map(Number);
+        outline.points[pi].subs[si] = inp.value;
+        save();
+      });
+    });
+    container.querySelectorAll('[data-delpoint]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        outline.points.splice(Number(btn.getAttribute('data-delpoint')), 1);
+        save(); renderPoints();
+      });
+    });
+    container.querySelectorAll('[data-delsub]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const [pi, si] = btn.getAttribute('data-delsub').split(':').map(Number);
+        outline.points[pi].subs.splice(si, 1);
+        save(); renderPoints();
+      });
+    });
+    container.querySelectorAll('[data-addsub]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        outline.points[Number(btn.getAttribute('data-addsub'))].subs.push('');
+        save(); renderPoints();
+      });
+    });
+  }
+
+  function escapeAttr(s) { return (s || '').replace(/"/g, '&quot;'); }
+
+  document.getElementById('addPoint').addEventListener('click', () => {
+    outline.points.push({ text: '', subs: [''] });
+    save(); renderPoints();
+  });
+
+  document.getElementById('thesis').addEventListener('input', (e) => { outline.thesis = e.target.value; save(); });
+  document.getElementById('conclusion').addEventListener('input', (e) => { outline.conclusion = e.target.value; save(); });
+
+  document.getElementById('saveOutline').addEventListener('click', () => {
+    save();
+    document.getElementById('saveStatus').textContent = 'Saved to this browser.';
+  });
+
+  document.getElementById('clearOutline').addEventListener('click', () => {
+    if (!confirm('Clear the whole outline?')) return;
+    outline = { thesis: '', conclusion: '', points: [{ text: '', subs: [''] }, { text: '', subs: [''] }] };
+    document.getElementById('thesis').value = '';
+    document.getElementById('conclusion').value = '';
+    save(); renderPoints();
+  });
+
+  document.getElementById('exportOutline').addEventListener('click', () => {
+    let text = `Thesis: ${outline.thesis}\n\n`;
+    outline.points.forEach((p, i) => {
+      text += `${i + 1}. ${p.text}\n`;
+      p.subs.filter(Boolean).forEach(s => { text += `   - ${s}\n`; });
+    });
+    text += `\nConclusion: ${outline.conclusion}\n`;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'essay-outline.txt';
+    a.click();
+  });
+
+  document.getElementById('thesis').value = outline.thesis;
+  document.getElementById('conclusion').value = outline.conclusion;
+  renderPoints();
+</script>
+
+</body>
+</html>

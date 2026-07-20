@@ -7,14 +7,43 @@
   <title>Tools - StudyReady</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/tools.css">
 </head>
 <body>
 
 <header>
   <a class="logo" href="/">StudyReady</a>
   <nav>
-    <a href="/tools" class="active">Tools</a>
-    <a href="/subjects">Subjects</a>
+    <div class="nav-dropdown">
+      <a href="/tools" class="active">Tools</a>
+      <div class="dropdown-menu">
+        <a href="/tools/flashcards">Flashcard Builder</a>
+        <a href="/tools/quiz-generator">Practice Quiz Generator</a>
+        <a href="/tools/word-driller">Word List Driller</a>
+        <a href="/tools/cornell-notes">Cornell Notes Template</a>
+        <a href="/tools/study-planner">Study Planner</a>
+        <a href="/tools/concept-map">Concept Map Builder</a>
+        <a href="/tools/pomodoro">Pomodoro Timer</a>
+        <a href="/tools/essay-outline">Essay Outline Tool</a>
+        <a href="/tools/focus-checklist">Focus Checklist</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="/subjects">Subjects</a>
+      <div class="dropdown-menu">
+        <a href="/subjects/math">Mathematics</a>
+        <a href="/subjects/biology">Biology</a>
+        <a href="/subjects/chemistry">Chemistry</a>
+        <a href="/subjects/physics">Physics</a>
+        <a href="/subjects/world-history">World History</a>
+        <a href="/subjects/us-history">US History</a>
+        <a href="/subjects/literature">Literature</a>
+        <a href="/subjects/writing-grammar">Writing & Grammar</a>
+        <a href="/subjects/languages">Foreign Languages</a>
+        <a href="/subjects/computer-science">Computer Science</a>
+        <a href="/subjects/economics">Economics</a>
+      </div>
+    </div>
     <a href="/tips">Tips</a>
     <a href="/about">About</a>
   </nav>
@@ -30,21 +59,21 @@
   <p class="section-label">Memorization</p>
   <h2>Retain what you learn</h2>
   <div class="grid">
-    <div class="card">
+    <a class="card" href="/tools/flashcards">
       <span class="tag">Flashcards</span>
       <h3>Flashcard Builder</h3>
       <p>Create and review digital flashcards using spaced repetition - the most effective method for long-term memorization.</p>
-    </div>
-    <div class="card">
+    </a>
+    <a class="card" href="/tools/quiz-generator">
       <span class="tag">Self-Testing</span>
       <h3>Practice Quiz Generator</h3>
-      <p>Paste your notes and generate multiple choice or short answer questions instantly. Great for exam prep.</p>
-    </div>
-    <div class="card">
+      <p>Enter your notes as question-and-answer pairs and generate a multiple choice quiz instantly. Great for exam prep.</p>
+    </a>
+    <a class="card" href="/tools/word-driller">
       <span class="tag">Vocabulary</span>
       <h3>Word List Driller</h3>
       <p>Build vocabulary lists for any subject - foreign languages, science terms, history names - and drill them on repeat.</p>
-    </div>
+    </a>
   </div>
 </div>
 
@@ -52,21 +81,21 @@
   <p class="section-label">Organization</p>
   <h2>Keep your notes and time in order</h2>
   <div class="grid">
-    <div class="card">
+    <a class="card" href="/tools/cornell-notes">
       <span class="tag">Note-Taking</span>
       <h3>Cornell Notes Template</h3>
       <p>The Cornell method splits notes into cues, content, and summary - proven to improve retention and review speed.</p>
-    </div>
-    <div class="card">
+    </a>
+    <a class="card" href="/tools/study-planner">
       <span class="tag">Planning</span>
       <h3>Study Planner</h3>
       <p>Break assignments into daily sessions. Set deadlines, mark priorities, and track what's done.</p>
-    </div>
-    <div class="card">
+    </a>
+    <a class="card" href="/tools/concept-map">
       <span class="tag">Mind Mapping</span>
       <h3>Concept Map Builder</h3>
       <p>Visualize how ideas connect. Useful for understanding complex topics in science, history, or literature.</p>
-    </div>
+    </a>
   </div>
 </div>
 
@@ -74,21 +103,21 @@
   <p class="section-label">Focus</p>
   <h2>Stay on task</h2>
   <div class="grid">
-    <div class="card">
+    <a class="card" href="/tools/pomodoro">
       <span class="tag">Timer</span>
       <h3>Pomodoro Timer</h3>
       <p>25 minutes of focused work followed by a 5-minute break. Repeat. One of the most popular productivity techniques worldwide.</p>
-    </div>
-    <div class="card">
+    </a>
+    <a class="card" href="/tools/essay-outline">
       <span class="tag">Writing</span>
       <h3>Essay Outline Tool</h3>
       <p>Structure your argument before you start writing. Build a thesis, supporting paragraphs, and a conclusion that holds together.</p>
-    </div>
-    <div class="card">
+    </a>
+    <a class="card" href="/tools/focus-checklist">
       <span class="tag">Distraction</span>
       <h3>Focus Checklist</h3>
       <p>A simple pre-study checklist: phone away, water nearby, notifications off, goal written down. Takes 60 seconds.</p>
-    </div>
+    </a>
   </div>
 </div>
 

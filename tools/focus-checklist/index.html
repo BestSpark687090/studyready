@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free pre-study focus checklist. A simple 60-second checklist to clear distractions before you start studying - no account needed.">
+  <title>Focus Checklist - StudyReady</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/tools.css">
+  <style>
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .check-row:last-child { border-bottom: none; }
+    .check-row input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; }
+    .check-row label { margin: 0; font-size: 0.95rem; font-weight: 400; color: var(--text); flex: 1; }
+    .check-row.checked label { text-decoration: line-through; color: var(--muted); }
+    .progress-bar-track {
+      background: var(--border);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+    .progress-bar-fill { background: var(--accent); height: 100%; transition: width 0.3s; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">StudyReady</a>
+  <nav>
+    <div class="nav-dropdown">
+      <a href="/tools" class="active">Tools</a>
+      <div class="dropdown-menu">
+        <a href="/tools/flashcards">Flashcard Builder</a>
+        <a href="/tools/quiz-generator">Practice Quiz Generator</a>
+        <a href="/tools/word-driller">Word List Driller</a>
+        <a href="/tools/cornell-notes">Cornell Notes Template</a>
+        <a href="/tools/study-planner">Study Planner</a>
+        <a href="/tools/concept-map">Concept Map Builder</a>
+        <a href="/tools/pomodoro">Pomodoro Timer</a>
+        <a href="/tools/essay-outline">Essay Outline Tool</a>
+        <a href="/tools/focus-checklist" class="active">Focus Checklist</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="/subjects">Subjects</a>
+      <div class="dropdown-menu">
+        <a href="/subjects/math">Mathematics</a>
+        <a href="/subjects/biology">Biology</a>
+        <a href="/subjects/chemistry">Chemistry</a>
+        <a href="/subjects/physics">Physics</a>
+        <a href="/subjects/world-history">World History</a>
+        <a href="/subjects/us-history">US History</a>
+        <a href="/subjects/literature">Literature</a>
+        <a href="/subjects/writing-grammar">Writing & Grammar</a>
+        <a href="/subjects/languages">Foreign Languages</a>
+        <a href="/subjects/computer-science">Computer Science</a>
+        <a href="/subjects/economics">Economics</a>
+      </div>
+    </div>
+    <a href="/tips">Tips</a>
+    <a href="/about">About</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <p class="section-label">Distraction</p>
+  <h1>Focus Checklist</h1>
+  <p>A simple pre-study checklist: phone away, water nearby, notifications off, goal written down. Takes about 60 seconds and clears the small frictions that quietly derail a study session before it starts. Resets automatically each day.</p>
+</div>
+
+<div class="tool-shell">
+  <a class="tool-back" href="/tools">&larr; Back to Tools</a>
+
+  <div class="tool-panel">
+    <h2>Before you start today</h2>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill" style="width:0%;"></div></div>
+    <p class="helper-text" id="progressText"></p>
+    <div id="checklist"></div>
+  </div>
+
+  <div class="tool-panel">
+    <h2>Add your own item</h2>
+    <div class="field-row">
+      <div>
+        <label for="customItem">Custom checklist item</label>
+        <input type="text" id="customItem" placeholder="e.g. Close extra browser tabs">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn secondary" id="addItem">Add item</button>
+      <button class="btn danger" id="resetAll">Reset all checkmarks</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  &copy; 2025 StudyReady &nbsp;&middot;&nbsp; Free for all students &nbsp;&middot;&nbsp; No account needed
+</footer>
+
+<script src="/tools.js"></script>
+<script>
+  const STORE_KEY = 'studyready_focuschecklist';
+  const defaultItems = [
+    'Phone in another room (or on airplane mode)',
+    'Water or a drink nearby',
+    'Notifications turned off',
+    "Today's goal written down in one sentence",
+    'Workspace cleared of unrelated clutter',
+    'Materials for this session ready (notes, textbook, etc.)'
+  ];
+
+  function todayKey() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  let data = StudyStore.get(STORE_KEY, null);
+  if (!data || data.date !== todayKey()) {
+    const customItems = (data && data.items) ? data.items.filter(i => i.custom).map(i => ({ text: i.text, done: false, custom: true })) : [];
+    data = {
+      date: todayKey(),
+      items: [...defaultItems.map(text => ({ text, done: false, custom: false })), ...customItems]
+    };
+    StudyStore.set(STORE_KEY, data);
+  }
+
+  function save() { StudyStore.set(STORE_KEY, data); }
+
+  function render() {
+    const el = document.getElementById('checklist');
+    el.innerHTML = '';
+    data.items.forEach((item, i) => {
+      const row = document.createElement('div');
+      row.className = 'check-row' + (item.done ? ' checked' : '');
+      row.innerHTML = `
+        <input type="checkbox" id="chk${i}" ${item.done ? 'checked' : ''}>
+        <label for="chk${i}">${item.text}</label>
+        ${item.custom ? `<button class="icon-btn" data-del="${i}" title="Remove">&times;</button>` : ''}
+      `;
+      el.appendChild(row);
+    });
+    el.querySelectorAll('input[type="checkbox"]').forEach((cb, i) => {
+      cb.addEventListener('change', () => {
+        data.items[i].done = cb.checked;
+        save();
+        render();
+      });
+    });
+    el.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        data.items.splice(Number(btn.getAttribute('data-del')), 1);
+        save();
+        render();
+      });
+    });
+
+    const doneCount = data.items.filter(i => i.done).length;
+    const pct = data.items.length ? Math.round(doneCount / data.items.length * 100) : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = `${doneCount} of ${data.items.length} done - ${pct === 100 ? "you're ready to go." : 'clear the rest before you dive in.'}`;
+  }
+
+  document.getElementById('addItem').addEventListener('click', () => {
+    const text = document.getElementById('customItem').value.trim();
+    if (!text) return;
+    data.items.push({ text, done: false, custom: true });
+    document.getElementById('customItem').value = '';
+    save();
+    render();
+  });
+
+  document.getElementById('resetAll').addEventListener('click', () => {
+    data.items.forEach(i => i.done = false);
+    save();
+    render();
+  });
+
+  render();
+</script>
+
+</body>
+</html>

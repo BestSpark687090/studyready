@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Computer science study reference: data structures, algorithms, Big O notation, and pseudocode examples for introductory CS courses.">
+  <title>Computer Science - StudyReady</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/subjects.css">
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">StudyReady</a>
+  <nav>
+    <div class="nav-dropdown">
+      <a href="/tools">Tools</a>
+      <div class="dropdown-menu">
+        <a href="/tools/flashcards">Flashcard Builder</a>
+        <a href="/tools/quiz-generator">Practice Quiz Generator</a>
+        <a href="/tools/word-driller">Word List Driller</a>
+        <a href="/tools/cornell-notes">Cornell Notes Template</a>
+        <a href="/tools/study-planner">Study Planner</a>
+        <a href="/tools/concept-map">Concept Map Builder</a>
+        <a href="/tools/pomodoro">Pomodoro Timer</a>
+        <a href="/tools/essay-outline">Essay Outline Tool</a>
+        <a href="/tools/focus-checklist">Focus Checklist</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="/subjects" class="active">Subjects</a>
+      <div class="dropdown-menu">
+        <a href="/subjects/math">Mathematics</a>
+        <a href="/subjects/biology">Biology</a>
+        <a href="/subjects/chemistry">Chemistry</a>
+        <a href="/subjects/physics">Physics</a>
+        <a href="/subjects/world-history">World History</a>
+        <a href="/subjects/us-history">US History</a>
+        <a href="/subjects/literature">Literature</a>
+        <a href="/subjects/writing-grammar">Writing & Grammar</a>
+        <a href="/subjects/languages">Foreign Languages</a>
+        <a href="/subjects/computer-science" class="active">Computer Science</a>
+        <a href="/subjects/economics">Economics</a>
+      </div>
+    </div>
+    <a href="/tips">Tips</a>
+    <a href="/about">About</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <p class="section-label">Computing &middot; <a href="/subjects" style="color:inherit;">Subjects</a></p>
+  <h1>Computer Science</h1>
+  <p>Core data structures, common algorithms, and Big O notation - the vocabulary that shows up in almost every intro CS course.</p>
+  <div class="subject-jump">
+    <a href="#structures">Data Structures</a>
+    <a href="#algorithms">Algorithms</a>
+    <a href="#bigo">Big O Notation</a>
+  </div>
+</div>
+
+<div class="section" id="structures">
+  <p class="section-label">Foundations</p>
+  <h2>Data structures glossary</h2>
+  <table class="ref-table">
+    <tr><th>Structure</th><th>What it is</th></tr>
+    <tr><td>Array</td><td>A fixed-size, ordered collection of elements accessed by index; fast lookups, slow inserts in the middle</td></tr>
+    <tr><td>Linked list</td><td>A chain of nodes where each points to the next; fast inserts/deletes, slow lookups</td></tr>
+    <tr><td>Stack</td><td>Last-in, first-out (LIFO) - like a stack of plates. Used for undo functions, call stacks</td></tr>
+    <tr><td>Queue</td><td>First-in, first-out (FIFO) - like a line at a store. Used for task scheduling, breadth-first search</td></tr>
+    <tr><td>Hash table (map)</td><td>Stores key-value pairs with near-instant lookup by key</td></tr>
+    <tr><td>Tree</td><td>A hierarchical structure of nodes with a single root; binary search trees keep data sorted for fast lookup</td></tr>
+    <tr><td>Graph</td><td>A set of nodes connected by edges, used to model networks (maps, social connections, dependencies)</td></tr>
+  </table>
+</div>
+
+<div class="section" id="algorithms">
+  <p class="section-label">Problem-Solving</p>
+  <h2>Common algorithms</h2>
+  <dl class="glossary">
+    <div class="glossary-item"><dt>Binary search</dt><dd>Repeatedly halves a <em>sorted</em> list to find a target - O(log n) instead of checking every element.</dd></div>
+    <div class="glossary-item"><dt>Bubble sort</dt><dd>Repeatedly swaps adjacent out-of-order elements. Simple to understand but slow - O(n&sup2;) - on large lists.</dd></div>
+    <div class="glossary-item"><dt>Merge sort</dt><dd>Splits a list in half recursively, sorts each half, then merges them - O(n log n), much faster than bubble sort at scale.</dd></div>
+    <div class="glossary-item"><dt>Breadth-first search (BFS)</dt><dd>Explores a graph level by level using a queue - finds the shortest path in an unweighted graph.</dd></div>
+    <div class="glossary-item"><dt>Depth-first search (DFS)</dt><dd>Explores a graph by going as deep as possible before backtracking, typically using a stack or recursion.</dd></div>
+  </dl>
+</div>
+
+<div class="section" id="bigo">
+  <p class="section-label">Efficiency</p>
+  <h2>Big O notation cheat sheet</h2>
+  <table class="ref-table">
+    <tr><th>Notation</th><th>Name</th><th>Example</th></tr>
+    <tr><td><code>O(1)</code></td><td>Constant</td><td>Accessing an array element by index</td></tr>
+    <tr><td><code>O(log n)</code></td><td>Logarithmic</td><td>Binary search</td></tr>
+    <tr><td><code>O(n)</code></td><td>Linear</td><td>Looping through a list once</td></tr>
+    <tr><td><code>O(n log n)</code></td><td>Linearithmic</td><td>Merge sort, quicksort (average case)</td></tr>
+    <tr><td><code>O(n&sup2;)</code></td><td>Quadratic</td><td>Nested loops over the same list (bubble sort)</td></tr>
+  </table>
+  <p class="helper-text">Big O describes how an algorithm's running time grows as input size grows - it's about scalability, not raw speed on small inputs.</p>
+  <div class="related-tools">
+    <a class="btn secondary" href="/tools/concept-map">Map how data structures relate &rarr;</a>
+    <a class="btn secondary" href="/tools/flashcards">Drill Big O classes &rarr;</a>
+  </div>
+</div>
+
+<div class="about-band">
+  <p>Looking for another subject? <a href="/subjects" style="color:inherit;">See all subjects</a> or head back to <a href="/tools" style="color:inherit;">Tools</a>.</p>
+</div>
+
+<footer>
+  &copy; 2025 StudyReady &nbsp;&middot;&nbsp; Free for all students &nbsp;&middot;&nbsp; No account needed
+</footer>
+
+</body>
+</html>

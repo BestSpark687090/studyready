@@ -1,0 +1,82 @@
+/* Shared styles for subject reference pages */
+
+.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.88rem;
+  margin-bottom: 0.5rem;
+}
+
+.ref-table th, .ref-table td {
+  text-align: left;
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ref-table th {
+  background: var(--bg);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.ref-table tr:last-child td { border-bottom: none; }
+
+.ref-table code { background: var(--tag-bg); padding: 0.1rem 0.35rem; border-radius: 4px; }
+
+.glossary {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.glossary-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 0.9rem 1.1rem;
+}
+
+.glossary-item dt {
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin-bottom: 0.25rem;
+}
+
+.glossary-item dd {
+  font-size: 0.86rem;
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.subject-jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.5rem 0 0;
+}
+
+.subject-jump a {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--tag-bg);
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.subject-jump a:hover { background: var(--accent-light); }
+
+.related-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free concept map builder. Visualize how ideas connect by placing nodes and drawing links between them - no account needed.">
+  <title>Concept Map Builder - StudyReady</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/tools.css">
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">StudyReady</a>
+  <nav>
+    <div class="nav-dropdown">
+      <a href="/tools" class="active">Tools</a>
+      <div class="dropdown-menu">
+        <a href="/tools/flashcards">Flashcard Builder</a>
+        <a href="/tools/quiz-generator">Practice Quiz Generator</a>
+        <a href="/tools/word-driller">Word List Driller</a>
+        <a href="/tools/cornell-notes">Cornell Notes Template</a>
+        <a href="/tools/study-planner">Study Planner</a>
+        <a href="/tools/concept-map" class="active">Concept Map Builder</a>
+        <a href="/tools/pomodoro">Pomodoro Timer</a>
+        <a href="/tools/essay-outline">Essay Outline Tool</a>
+        <a href="/tools/focus-checklist">Focus Checklist</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="/subjects">Subjects</a>
+      <div class="dropdown-menu">
+        <a href="/subjects/math">Mathematics</a>
+        <a href="/subjects/biology">Biology</a>
+        <a href="/subjects/chemistry">Chemistry</a>
+        <a href="/subjects/physics">Physics</a>
+        <a href="/subjects/world-history">World History</a>
+        <a href="/subjects/us-history">US History</a>
+        <a href="/subjects/literature">Literature</a>
+        <a href="/subjects/writing-grammar">Writing & Grammar</a>
+        <a href="/subjects/languages">Foreign Languages</a>
+        <a href="/subjects/computer-science">Computer Science</a>
+        <a href="/subjects/economics">Economics</a>
+      </div>
+    </div>
+    <a href="/tips">Tips</a>
+    <a href="/about">About</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <p class="section-label">Mind Mapping</p>
+  <h1>Concept Map Builder</h1>
+  <p>Add idea nodes, drag them around, and link related ideas together to see how a topic fits together. Useful for breaking down a complex chapter, planning an essay, or reviewing before an exam.</p>
+</div>
+
+<div class="tool-shell">
+  <a class="tool-back" href="/tools">&larr; Back to Tools</a>
+
+  <div class="tool-panel">
+    <div class="field-row">
+      <div>
+        <label for="nodeLabel">New idea</label>
+        <input type="text" id="nodeLabel" placeholder="e.g. Mitosis">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="addNode">Add node</button>
+      <button class="btn secondary" id="connectMode">Connect two nodes</button>
+      <button class="btn danger" id="clearMap">Clear map</button>
+    </div>
+    <p class="helper-text" id="mapHint">Drag nodes to position them. Click "Connect two nodes," then click two nodes in a row to draw a link between them.</p>
+  </div>
+
+  <div class="map-canvas" id="mapCanvas">
+    <svg id="linkLayer" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none;"></svg>
+  </div>
+</div>
+
+<footer>
+  &copy; 2025 StudyReady &nbsp;&middot;&nbsp; Free for all students &nbsp;&middot;&nbsp; No account needed
+</footer>
+
+<script src="/tools.js"></script>
+<script>
+  const STORE_KEY = 'studyready_conceptmap';
+  let mapData = StudyStore.get(STORE_KEY, { nodes: [], links: [] });
+  let connectModeOn = false;
+  let connectFirst = null;
+  const canvas = document.getElementById('mapCanvas');
+  const svg = document.getElementById('linkLayer');
+
+  function save() { StudyStore.set(STORE_KEY, mapData); }
+  function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function render() {
+    canvas.querySelectorAll('.map-node').forEach(n => n.remove());
+    mapData.nodes.forEach(node => {
+      const el = document.createElement('div');
+      el.className = 'map-node' + (connectFirst === node.id ? ' selected' : '');
+      el.style.left = node.x + 'px';
+      el.style.top = node.y + 'px';
+      el.textContent = node.label;
+      el.dataset.id = node.id;
+      makeDraggable(el, node);
+      el.addEventListener('click', (e) => {
+        if (connectModeOn) {
+          e.stopPropagation();
+          handleConnectClick(node.id);
+        }
+      });
+      canvas.appendChild(el);
+    });
+    drawLinks();
+  }
+
+  function drawLinks() {
+    svg.innerHTML = '';
+    mapData.links.forEach(link => {
+      const a = mapData.nodes.find(n => n.id === link.from);
+      const b = mapData.nodes.find(n => n.id === link.to);
+      if (!a || !b) return;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', a.x + 60);
+      line.setAttribute('y1', a.y + 20);
+      line.setAttribute('x2', b.x + 60);
+      line.setAttribute('y2', b.y + 20);
+      line.setAttribute('stroke', '#2d6a4f');
+      line.setAttribute('stroke-width', '2');
+      svg.appendChild(line);
+    });
+  }
+
+  function makeDraggable(el, node) {
+    let dragging = false, offX = 0, offY = 0;
+    el.addEventListener('mousedown', (e) => {
+      if (connectModeOn) return;
+      dragging = true;
+      const rect = canvas.getBoundingClientRect();
+      offX = e.clientX - rect.left - node.x;
+      offY = e.clientY - rect.top - node.y;
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const rect = canvas.getBoundingClientRect();
+      node.x = Math.max(0, Math.min(rect.width - 120, e.clientX - rect.left - offX));
+      node.y = Math.max(0, Math.min(rect.height - 50, e.clientY - rect.top - offY));
+      el.style.left = node.x + 'px';
+      el.style.top = node.y + 'px';
+      drawLinks();
+    });
+    window.addEventListener('mouseup', () => {
+      if (dragging) { dragging = false; save(); }
+    });
+  }
+
+  function handleConnectClick(id) {
+    if (connectFirst === null) {
+      connectFirst = id;
+      render();
+      document.getElementById('mapHint').textContent = 'Now click the second node to link it to.';
+    } else if (connectFirst !== id) {
+      mapData.links.push({ from: connectFirst, to: id });
+      connectFirst = null;
+      connectModeOn = false;
+      document.getElementById('connectMode').classList.remove('secondary');
+      document.getElementById('mapHint').textContent = 'Link created. Drag nodes to position them, or connect more ideas.';
+      save();
+      render();
+    }
+  }
+
+  document.getElementById('addNode').addEventListener('click', () => {
+    const label = document.getElementById('nodeLabel').value.trim();
+    if (!label) return;
+    mapData.nodes.push({
+      id: StudyStore.uid(),
+      label,
+      x: 20 + Math.random() * 200,
+      y: 20 + Math.random() * 200
+    });
+    document.getElementById('nodeLabel').value = '';
+    save();
+    render();
+  });
+
+  document.getElementById('connectMode').addEventListener('click', function () {
+    connectModeOn = !connectModeOn;
+    connectFirst = null;
+    this.classList.toggle('secondary', !connectModeOn);
+    document.getElementById('mapHint').textContent = connectModeOn
+      ? 'Click a node, then click a second node to link them.'
+      : 'Drag nodes to position them. Click "Connect two nodes" to link ideas.';
+    render();
+  });
+
+  document.getElementById('clearMap').addEventListener('click', () => {
+    if (!mapData.nodes.length || !confirm('Clear the whole map?')) return;
+    mapData = { nodes: [], links: [] };
+    save();
+    render();
+  });
+
+  render();
+</script>
+
+</body>
+</html>

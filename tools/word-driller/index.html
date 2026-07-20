@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free vocabulary word list driller. Build word lists for any subject or language and drill them until mastered - no account needed.">
+  <title>Word List Driller - StudyReady</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/tools.css">
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">StudyReady</a>
+  <nav>
+    <div class="nav-dropdown">
+      <a href="/tools" class="active">Tools</a>
+      <div class="dropdown-menu">
+        <a href="/tools/flashcards">Flashcard Builder</a>
+        <a href="/tools/quiz-generator">Practice Quiz Generator</a>
+        <a href="/tools/word-driller" class="active">Word List Driller</a>
+        <a href="/tools/cornell-notes">Cornell Notes Template</a>
+        <a href="/tools/study-planner">Study Planner</a>
+        <a href="/tools/concept-map">Concept Map Builder</a>
+        <a href="/tools/pomodoro">Pomodoro Timer</a>
+        <a href="/tools/essay-outline">Essay Outline Tool</a>
+        <a href="/tools/focus-checklist">Focus Checklist</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="/subjects">Subjects</a>
+      <div class="dropdown-menu">
+        <a href="/subjects/math">Mathematics</a>
+        <a href="/subjects/biology">Biology</a>
+        <a href="/subjects/chemistry">Chemistry</a>
+        <a href="/subjects/physics">Physics</a>
+        <a href="/subjects/world-history">World History</a>
+        <a href="/subjects/us-history">US History</a>
+        <a href="/subjects/literature">Literature</a>
+        <a href="/subjects/writing-grammar">Writing & Grammar</a>
+        <a href="/subjects/languages">Foreign Languages</a>
+        <a href="/subjects/computer-science">Computer Science</a>
+        <a href="/subjects/economics">Economics</a>
+      </div>
+    </div>
+    <a href="/tips">Tips</a>
+    <a href="/about">About</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <p class="section-label">Vocabulary</p>
+  <h1>Word List Driller</h1>
+  <p>Build a list of terms and definitions - foreign language vocabulary, science terms, historical names - then drill through them. Words you get right twice in a row are marked mastered and drop out of the rotation; words you miss come back sooner.</p>
+</div>
+
+<div class="tool-shell">
+  <a class="tool-back" href="/tools">&larr; Back to Tools</a>
+
+  <div class="tool-panel">
+    <h2>Word list</h2>
+    <div class="field-row">
+      <div>
+        <label for="term">Term</label>
+        <input type="text" id="term" placeholder="e.g. Photosynthesis">
+      </div>
+      <div>
+        <label for="def">Definition</label>
+        <input type="text" id="def" placeholder="e.g. Process plants use to convert light into energy">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="addWord">Add word</button>
+      <button class="btn secondary" id="startDrill">Start drill</button>
+      <button class="btn danger" id="clearWords">Clear list</button>
+    </div>
+    <div class="item-list" id="wordList" style="margin-top:1.25rem;"></div>
+    <p class="empty-state" id="noWords">No words yet. Add your first term above.</p>
+  </div>
+
+  <div class="tool-panel" id="drillPanel" style="display:none;">
+    <h2>Drilling</h2>
+    <p class="helper-text" id="drillProgress"></p>
+    <div class="flip-card" id="flipCard" style="margin:1.5rem 0;">
+      <div class="flip-card-inner">
+        <div class="flip-card-face front" id="faceFront"></div>
+        <div class="flip-card-face back" id="faceBack"></div>
+      </div>
+    </div>
+    <p class="helper-text no-print">Click to flip, then say whether you knew it.</p>
+    <div class="btn-row">
+      <button class="btn secondary" id="markMiss">I didn't know it</button>
+      <button class="btn" id="markHit">I knew it</button>
+      <button class="btn secondary" id="endDrill">End drill</button>
+    </div>
+    <p class="empty-state" id="drillDone" style="display:none;">All words mastered for this session. Nice work.</p>
+  </div>
+</div>
+
+<footer>
+  &copy; 2025 StudyReady &nbsp;&middot;&nbsp; Free for all students &nbsp;&middot;&nbsp; No account needed
+</footer>
+
+<script src="/tools.js"></script>
+<script>
+  const STORE_KEY = 'studyready_worddriller';
+  let words = StudyStore.get(STORE_KEY, []);
+  let queue = [];
+  let current = null;
+
+  function save() { StudyStore.set(STORE_KEY, words); }
+  function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function renderWords() {
+    const list = document.getElementById('wordList');
+    const empty = document.getElementById('noWords');
+    list.innerHTML = '';
+    if (!words.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    words.forEach((w, i) => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <div class="grow">
+          <strong>${escapeHtml(w.term)}</strong>
+          <div class="meta">${escapeHtml(w.def)}</div>
+        </div>
+        <span class="pill ${w.streak >= 2 ? 'mastered' : ''}">${w.streak >= 2 ? 'Mastered' : 'Learning'}</span>
+        <button class="icon-btn" data-del="${i}" title="Delete">&times;</button>
+      `;
+      list.appendChild(row);
+    });
+    list.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        words.splice(Number(btn.getAttribute('data-del')), 1);
+        save();
+        renderWords();
+      });
+    });
+  }
+
+  document.getElementById('addWord').addEventListener('click', () => {
+    const term = document.getElementById('term').value.trim();
+    const def = document.getElementById('def').value.trim();
+    if (!term || !def) return;
+    words.push({ term, def, streak: 0 });
+    document.getElementById('term').value = '';
+    document.getElementById('def').value = '';
+    save();
+    renderWords();
+  });
+
+  document.getElementById('clearWords').addEventListener('click', () => {
+    if (!words.length || !confirm('Clear the entire word list?')) return;
+    words = [];
+    save();
+    renderWords();
+  });
+
+  document.getElementById('startDrill').addEventListener('click', () => {
+    if (!words.length) return;
+    words.forEach(w => w.streak = Math.min(w.streak, 1));
+    queue = words.map((_, i) => i);
+    document.getElementById('drillPanel').style.display = 'block';
+    document.getElementById('drillDone').style.display = 'none';
+    nextDrillCard();
+    document.getElementById('drillPanel').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  function nextDrillCard() {
+    document.getElementById('flipCard').classList.remove('flipped');
+    queue = queue.filter(i => words[i].streak < 2);
+    if (!queue.length) {
+      document.getElementById('drillDone').style.display = 'block';
+      document.getElementById('drillProgress').textContent = '';
+      document.getElementById('faceFront').textContent = '';
+      document.getElementById('faceBack').textContent = '';
+      return;
+    }
+    const idx = queue[Math.floor(Math.random() * queue.length)];
+    current = idx;
+    document.getElementById('faceFront').textContent = words[idx].term;
+    document.getElementById('faceBack').textContent = words[idx].def;
+    const remaining = queue.length;
+    const total = words.length;
+    document.getElementById('drillProgress').textContent = `${total - remaining} of ${total} mastered this session`;
+  }
+
+  document.getElementById('flipCard').addEventListener('click', function () {
+    this.classList.toggle('flipped');
+  });
+
+  document.getElementById('markHit').addEventListener('click', () => {
+    if (current === null) return;
+    words[current].streak++;
+    save();
+    renderWords();
+    nextDrillCard();
+  });
+
+  document.getElementById('markMiss').addEventListener('click', () => {
+    if (current === null) return;
+    words[current].streak = 0;
+    save();
+    renderWords();
+    nextDrillCard();
+  });
+
+  document.getElementById('endDrill').addEventListener('click', () => {
+    document.getElementById('drillPanel').style.display = 'none';
+  });
+
+  renderWords();
+</script>
+
+</body>
+</html>

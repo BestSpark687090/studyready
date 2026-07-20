@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free study planner. Break assignments into sessions, set deadlines and priorities, and track what's done - no account needed.">
+  <title>Study Planner - StudyReady</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/tools.css">
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">StudyReady</a>
+  <nav>
+    <div class="nav-dropdown">
+      <a href="/tools" class="active">Tools</a>
+      <div class="dropdown-menu">
+        <a href="/tools/flashcards">Flashcard Builder</a>
+        <a href="/tools/quiz-generator">Practice Quiz Generator</a>
+        <a href="/tools/word-driller">Word List Driller</a>
+        <a href="/tools/cornell-notes">Cornell Notes Template</a>
+        <a href="/tools/study-planner" class="active">Study Planner</a>
+        <a href="/tools/concept-map">Concept Map Builder</a>
+        <a href="/tools/pomodoro">Pomodoro Timer</a>
+        <a href="/tools/essay-outline">Essay Outline Tool</a>
+        <a href="/tools/focus-checklist">Focus Checklist</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="/subjects">Subjects</a>
+      <div class="dropdown-menu">
+        <a href="/subjects/math">Mathematics</a>
+        <a href="/subjects/biology">Biology</a>
+        <a href="/subjects/chemistry">Chemistry</a>
+        <a href="/subjects/physics">Physics</a>
+        <a href="/subjects/world-history">World History</a>
+        <a href="/subjects/us-history">US History</a>
+        <a href="/subjects/literature">Literature</a>
+        <a href="/subjects/writing-grammar">Writing & Grammar</a>
+        <a href="/subjects/languages">Foreign Languages</a>
+        <a href="/subjects/computer-science">Computer Science</a>
+        <a href="/subjects/economics">Economics</a>
+      </div>
+    </div>
+    <a href="/tips">Tips</a>
+    <a href="/about">About</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <p class="section-label">Planning</p>
+  <h1>Study Planner</h1>
+  <p>Break assignments into concrete sessions. Set a due date and priority for each task, check things off as you finish them, and let the planner sort everything so the most urgent work always floats to the top.</p>
+</div>
+
+<div class="tool-shell">
+  <a class="tool-back" href="/tools">&larr; Back to Tools</a>
+
+  <div class="tool-panel">
+    <h2>Add a task</h2>
+    <div class="field-row">
+      <div>
+        <label for="taskName">Task</label>
+        <input type="text" id="taskName" placeholder="e.g. Read Ch. 5, draft essay outline">
+      </div>
+      <div>
+        <label for="taskDue">Due date</label>
+        <input type="date" id="taskDue">
+      </div>
+      <div>
+        <label for="taskPriority">Priority</label>
+        <select id="taskPriority">
+          <option value="high">High</option>
+          <option value="medium" selected>Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="addTask">Add task</button>
+    </div>
+  </div>
+
+  <div class="tool-panel">
+    <h2>Your plan</h2>
+    <div class="field-row" style="margin-bottom:0.5rem;">
+      <div>
+        <label for="filterMode">Show</label>
+        <select id="filterMode">
+          <option value="active">Active tasks</option>
+          <option value="all">All tasks</option>
+          <option value="done">Completed only</option>
+        </select>
+      </div>
+    </div>
+    <div class="item-list" id="taskList"></div>
+    <p class="empty-state" id="noTasks" style="display:none;">Nothing here. Add a task above to build your plan.</p>
+  </div>
+</div>
+
+<footer>
+  &copy; 2025 StudyReady &nbsp;&middot;&nbsp; Free for all students &nbsp;&middot;&nbsp; No account needed
+</footer>
+
+<script src="/tools.js"></script>
+<script>
+  const STORE_KEY = 'studyready_planner';
+  let tasks = StudyStore.get(STORE_KEY, []);
+
+  function save() { StudyStore.set(STORE_KEY, tasks); }
+  function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  const priorityRank = { high: 0, medium: 1, low: 2 };
+
+  function isOverdue(t) {
+    if (!t.due || t.done) return false;
+    const today = new Date(); today.setHours(0,0,0,0);
+    return new Date(t.due) < today;
+  }
+
+  function render() {
+    const mode = document.getElementById('filterMode').value;
+    let list = tasks.slice();
+    if (mode === 'active') list = list.filter(t => !t.done);
+    if (mode === 'done') list = list.filter(t => t.done);
+    list.sort((a, b) => {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      const dueA = a.due || '9999-12-31';
+      const dueB = b.due || '9999-12-31';
+      if (dueA !== dueB) return dueA < dueB ? -1 : 1;
+      return priorityRank[a.priority] - priorityRank[b.priority];
+    });
+
+    const el = document.getElementById('taskList');
+    const empty = document.getElementById('noTasks');
+    el.innerHTML = '';
+    if (!list.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    list.forEach(t => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      const overdue = isOverdue(t);
+      row.innerHTML = `
+        <input type="checkbox" ${t.done ? 'checked' : ''} data-toggle="${t.id}">
+        <div class="grow" style="${t.done ? 'text-decoration:line-through; color:var(--muted);' : ''}">
+          <strong>${escapeHtml(t.name)}</strong>
+          <div class="meta">${t.due ? 'Due ' + t.due : 'No due date'}</div>
+        </div>
+        <span class="pill ${overdue ? 'overdue' : ''}">${t.priority}</span>
+        <button class="icon-btn" data-del="${t.id}" title="Delete">&times;</button>
+      `;
+      el.appendChild(row);
+    });
+
+    el.querySelectorAll('[data-toggle]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const t = tasks.find(x => x.id === cb.getAttribute('data-toggle'));
+        t.done = cb.checked;
+        save();
+        render();
+      });
+    });
+    el.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tasks = tasks.filter(t => t.id !== btn.getAttribute('data-del'));
+        save();
+        render();
+      });
+    });
+  }
+
+  document.getElementById('addTask').addEventListener('click', () => {
+    const name = document.getElementById('taskName').value.trim();
+    if (!name) return;
+    tasks.push({
+      id: StudyStore.uid(),
+      name,
+      due: document.getElementById('taskDue').value,
+      priority: document.getElementById('taskPriority').value,
+      done: false
+    });
+    document.getElementById('taskName').value = '';
+    document.getElementById('taskDue').value = '';
+    save();
+    render();
+  });
+
+  document.getElementById('filterMode').addEventListener('change', render);
+
+  render();
+</script>
+
+</body>
+</html>
