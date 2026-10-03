@@ -260,3 +260,90 @@ footer {
     justify-content: center;
   }
 }
+
+/* Long-form article text (about, guides, tool and subject commentary) */
+.prose {
+  max-width: 680px;
+}
+
+.prose p, .prose li {
+  color: var(--muted);
+  font-size: 0.97rem;
+  margin-bottom: 1.2rem;
+  line-height: 1.75;
+}
+
+.prose li { margin-bottom: 0.5rem; }
+
+.prose ul, .prose ol { padding-left: 1.4rem; margin-bottom: 1.2rem; }
+
+.prose h2 {
+  font-family: 'Merriweather', serif;
+  font-size: 1.35rem;
+  margin: 2.25rem 0 0.75rem;
+  color: var(--text);
+}
+
+.prose h3 {
+  font-family: 'Merriweather', serif;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  margin-top: 2rem;
+  color: var(--text);
+}
+
+.prose strong { color: var(--text); }
+
+.prose blockquote {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-light);
+  padding: 0.9rem 1.2rem;
+  border-radius: 0 8px 8px 0;
+  margin: 0 0 1.2rem;
+  color: #1b4332;
+  font-size: 0.95rem;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 0.88rem;
+  margin-bottom: 1.2rem;
+}
+
+.prose th, .prose td {
+  text-align: left;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.prose th { background: var(--bg); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+
+.article-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+
+.article-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.footer-links {
+  margin-top: 0.6rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.footer-links a { color: var(--muted); text-decoration: none; }
+.footer-links a:hover { color: var(--accent); }
