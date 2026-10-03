@@ -70,6 +70,7 @@
     <div class="btn-row">
       <button class="btn" id="addNode">Add node</button>
       <button class="btn secondary" id="connectMode">Connect two nodes</button>
+      <button class="btn secondary" id="shareMap">Copy share link</button>
       <button class="btn danger" id="clearMap">Clear map</button>
     </div>
     <p class="helper-text" id="mapHint">Drag nodes to position them. Click "Connect two nodes," then click two nodes in a row to draw a link between them.</p>
@@ -119,7 +120,7 @@
       el.className = 'map-node' + (connectFirst === node.id ? ' selected' : '');
       el.style.left = node.x + 'px';
       el.style.top = node.y + 'px';
-      el.textContent = node.label;
+      el.innerHTML = node.label;
       el.dataset.id = node.id;
       makeDraggable(el, node);
       el.addEventListener('click', (e) => {
@@ -221,6 +222,76 @@
     render();
   });
 
+  // Share links: the map is packed into the URL hash as #map=<base64url JSON>.
+  // Compact form: { n: [[label, x, y], ...], l: [[fromIndex, toIndex], ...] }
+  function encodeMap(data) {
+    const index = new Map(data.nodes.map((n, i) => [n.id, i]));
+    const packed = {
+      n: data.nodes.map(n => [n.label, Math.round(n.x), Math.round(n.y)]),
+      l: data.links
+        .filter(l => index.has(l.from) && index.has(l.to))
+        .map(l => [index.get(l.from), index.get(l.to)])
+    };
+    const bytes = new TextEncoder().encode(JSON.stringify(packed));
+    let bin = '';
+    bytes.forEach(b => { bin += String.fromCharCode(b); });
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function decodeMap(str) {
+    const b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+    const bin = atob(b64 + '='.repeat((4 - b64.length % 4) % 4));
+    const packed = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+    if (!packed || !Array.isArray(packed.n)) throw new Error('bad map');
+    const nodes = packed.n
+      .filter(n => Array.isArray(n) && typeof n[0] === 'string')
+      .map(n => ({
+        id: StudyStore.uid(),
+        label: n[0],//n[0].slice(0, 200),
+        x: Math.max(0, Number(n[1]) || 0),
+        y: Math.max(0, Number(n[2]) || 0)
+      }));
+    const links = (Array.isArray(packed.l) ? packed.l : [])
+      .filter(l => Array.isArray(l) && nodes[l[0]] && nodes[l[1]] && l[0] !== l[1])
+      .map(l => ({ from: nodes[l[0]].id, to: nodes[l[1]].id }));
+    return { nodes, links };
+  }
+
+  function importFromUrl() {
+    const match = location.hash.match(/^#map=([A-Za-z0-9_-]+)$/);
+    if (!match) return;
+    // Drop the hash so a reload doesn't re-import over later edits
+    history.replaceState(null, '', location.pathname + location.search);
+    let imported;
+    try {
+      imported = decodeMap(match[1]);
+    } catch (e) {
+      document.getElementById('mapHint').textContent = 'That share link looks broken, so nothing was imported.';
+      return;
+    }
+    if (mapData.nodes.length && !confirm('Replace your current map with the ' + imported.nodes.length + ' ideas from this link?')) return;
+    mapData = imported;
+    save();
+    document.getElementById('mapHint').textContent = 'Imported ' + imported.nodes.length + ' ideas from the link.';
+  }
+
+  document.getElementById('shareMap').addEventListener('click', () => {
+    if (!mapData.nodes.length) {
+      document.getElementById('mapHint').textContent = 'Add some ideas first, then copy a link to share them.';
+      return;
+    }
+    const url = location.origin + location.pathname + '#map=' + encodeMap(mapData);
+    const done = () => { document.getElementById('mapHint').textContent = 'Share link copied. Anyone who opens it gets a copy of this map.'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done, () => prompt('Copy this link:', url));
+    } else {
+      prompt('Copy this link:', url);
+    }
+  });
+
+  window.addEventListener('hashchange', () => { importFromUrl(); render(); });
+
+  importFromUrl();
   render();
 </script>
 
